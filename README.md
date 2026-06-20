@@ -6,7 +6,7 @@ A differential drive robot built from scratch using ROS2 Humble and Gazebo, runn
 - [x] Phase 0 — WSL2 + Ubuntu 22.04 + ROS2 Humble setup
 - [x] Phase 1 — ROS2 workspace and core concepts
 - [x] Phase 2 — URDF robot description visualized in RViz
-- [ ] Phase 3 — Launching in Gazebo simulation
+- [x] Phase 3 — Launching in Gazebo simulation
 - [ ] Phase 4 — ROS2 nodes for robot control
 - [ ] Phase 5 — Lidar sensor and obstacle avoidance
 - [ ] Phase 6 — Custom Gazebo world
