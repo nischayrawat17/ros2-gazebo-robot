@@ -13,7 +13,6 @@ class ObstacleAvoidance(Node):
     def scan_callback(self, msg):
         front_index = len(msg.ranges) // 2
         front_distance = msg.ranges[front_index]
-self.get_logger().info(f'DEBUG front_index={front_index} front_distance={front_distance}')
         twist = Twist()
         if front_distance < 0.6:
             self.get_logger().info(f'Obstacle at {front_distance:.2f}m - turning')
