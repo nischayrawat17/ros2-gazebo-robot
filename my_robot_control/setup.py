@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-		'square_drive = my_robot_control.square_drive:main',
+ 		'square_drive = my_robot_control.square_drive:main',
+            	'obstacle_avoidance = my_robot_control.obstacle_avoidance:main',
         ],
     },
 )
