@@ -13,7 +13,7 @@ This project simulates a differential-drive forklift operating inside a warehous
 - [x] Phase 4 — ROS2 publisher node for robot motion control
 - [x] Phase 5 — Lidar sensor integration + subscriber-based obstacle avoidance
 - [x] Phase 6 — Forklift redesign + integration into a warehouse simulation environment
-- [ ] Phase 7 — Camera-based pallet detection (OpenCV) + ROS2 action server for autonomous navigation
+- [x] Phase 7 — Camera-based pallet detection (OpenCV) + ROS2 action server for autonomous navigation
 - [ ] Phase 8 — Documentation, demo video, final polish
 
 ## Stack
