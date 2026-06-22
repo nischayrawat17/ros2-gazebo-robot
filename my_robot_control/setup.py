@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
  		'square_drive = my_robot_control.square_drive:main',
             	'obstacle_avoidance = my_robot_control.obstacle_avoidance:main',
+		'navigate_to_goal_server = my_robot_control.navigate_to_goal_server:main',
         ],
     },
 )
