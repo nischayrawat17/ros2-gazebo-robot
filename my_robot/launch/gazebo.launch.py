@@ -21,7 +21,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_gazebo_ros, 'launch', 'gazebo.launch.py')
         ),
-        launch_arguments={'world': world_path, 'gui': 'false'}.items()
+        launch_arguments={'world': world_path, 'gui': 'false', 'verbose': 'true'}.items()
     )
 
     robot_state_publisher = Node(
