@@ -4,7 +4,7 @@
   <link name="base_link">
     <visual>
       <geometry><box size="0.3 0.2 0.1"/></geometry>
-      <material name="blue"><color rgba="0 0 1 1"/></material>
+      <material name="yellow"><color rgba="1 0.8 0 1"/></material>
     </visual>
     <collision>
       <geometry><box size="0.3 0.2 0.1"/></geometry>
@@ -85,6 +85,48 @@
     </inertial>
   </link>
 
+  <link name="left_fork">
+    <visual>
+      <geometry><box size="0.35 0.04 0.02"/></geometry>
+      <material name="dark_grey"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.35 0.04 0.02"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <link name="right_fork">
+    <visual>
+      <geometry><box size="0.35 0.04 0.02"/></geometry>
+      <material name="dark_grey"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.35 0.04 0.02"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <link name="mast">
+    <visual>
+      <geometry><box size="0.05 0.18 0.35"/></geometry>
+      <material name="dark_grey"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.05 0.18 0.35"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
   <joint name="left_wheel_joint" type="continuous">
     <parent link="base_link"/>
     <child link="left_wheel"/>
@@ -117,9 +159,30 @@
     <origin xyz="0.0 0.0 0.07" rpy="0 0 0"/>
   </joint>
 
-  <gazebo reference="base_link"><material>Gazebo/Blue</material></gazebo>
+  <joint name="left_fork_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_fork"/>
+    <origin xyz="0.325 0.06 -0.06" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="right_fork_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_fork"/>
+    <origin xyz="0.325 -0.06 -0.06" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="mast_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="mast"/>
+    <origin xyz="0.16 0.0 0.225" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="base_link"><material>Gazebo/Yellow</material></gazebo>
   <gazebo reference="left_wheel"><material>Gazebo/Black</material></gazebo>
   <gazebo reference="right_wheel"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="left_fork"><material>Gazebo/Grey</material></gazebo>
+  <gazebo reference="right_fork"><material>Gazebo/Grey</material></gazebo>
+  <gazebo reference="mast"><material>Gazebo/Grey</material></gazebo>
   <gazebo reference="front_caster">
     <material>Gazebo/Grey</material>
     <mu1>0.0</mu1>

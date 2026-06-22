@@ -10,7 +10,9 @@ def generate_launch_description():
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
     urdf_path = os.path.join(pkg_my_robot, 'urdf', 'robot.urdf')
-    world_path = os.path.join(pkg_my_robot, 'worlds', 'arena.world')
+    world_path = os.path.expanduser(
+        '~/ros2_ws/src/aws-robomaker-small-warehouse-world/worlds/small_warehouse/small_warehouse.world'
+    )
 
     with open(urdf_path, 'r') as f:
         robot_description = f.read()
@@ -19,7 +21,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_gazebo_ros, 'launch', 'gazebo.launch.py')
         ),
-        launch_arguments={'world': world_path}.items()
+        launch_arguments={'world': world_path, 'gui': 'false'}.items()
     )
 
     robot_state_publisher = Node(
@@ -32,7 +34,7 @@ def generate_launch_description():
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-topic', 'robot_description', '-entity', 'my_robot'],
+        arguments=['-topic', 'robot_description', '-entity', 'my_robot', '-x', '0', '-y', '0', '-z', '0.2'],
         output='screen'
     )
 
