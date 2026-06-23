@@ -29,6 +29,10 @@ class NavigateToGoalServer(Node):
         self.current_y = 0.0
         self.current_yaw = 0.0
         self.front_distance = float('inf')
+        self.left_distance = float('inf')
+        self.right_distance = float('inf')
+
+        self.OBSTACLE_THRESHOLD = 1.5  # scaled up for the larger robot's footprint
 
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
 
@@ -55,8 +59,73 @@ class NavigateToGoalServer(Node):
         self.current_yaw = yaw_from_quaternion(msg.pose.pose.orientation)
 
     def scan_callback(self, msg):
-        front_index = len(msg.ranges) // 2
+        n = len(msg.ranges)
+        front_index = n // 2
+        left_index = (front_index + 90) % n
+        right_index = (front_index - 90) % n
         self.front_distance = msg.ranges[front_index]
+        self.left_distance = msg.ranges[left_index]
+        self.right_distance = msg.ranges[right_index]
+
+    def angle_to_goal(self, target_x, target_y):
+        dx = target_x - self.current_x
+        dy = target_y - self.current_y
+        target_angle = math.atan2(dy, dx)
+        angle_diff = target_angle - self.current_yaw
+        return math.atan2(math.sin(angle_diff), math.cos(angle_diff))
+
+    def avoid_obstacle(self, goal_handle, target_x, target_y):
+        """
+        Bug-style avoidance:
+        1. Turn toward whichever side has more clearance
+        2. Move forward a short distance
+        3. Turn back to face the goal
+        4. Check if the front is clear - if not, repeat
+        """
+        max_attempts = 15
+        attempts = 0
+
+        while attempts < max_attempts and rclpy.ok():
+            attempts += 1
+
+            turn_direction = 1.0 if self.left_distance > self.right_distance else -1.0
+            self.get_logger().info(
+                f'Obstacle at {self.front_distance:.2f}m - turning '
+                f'{"left" if turn_direction > 0 else "right"} to go around')
+
+            # Step 1: turn away from the obstacle
+            twist = Twist()
+            twist.angular.z = 0.5 * turn_direction
+            self.cmd_vel_pub.publish(twist)
+            time.sleep(1.0)
+            self.cmd_vel_pub.publish(Twist())
+
+            # Step 2: move forward a bit in the new direction
+            twist = Twist()
+            twist.linear.x = 0.2
+            self.cmd_vel_pub.publish(twist)
+            time.sleep(1.5)
+            self.cmd_vel_pub.publish(Twist())
+
+            # Step 3: turn back toward the goal
+            angle_diff = self.angle_to_goal(target_x, target_y)
+            turn_time = min(abs(angle_diff) / 0.5, 3.0)
+            twist = Twist()
+            twist.angular.z = 0.5 if angle_diff > 0 else -0.5
+            self.cmd_vel_pub.publish(twist)
+            time.sleep(turn_time)
+            self.cmd_vel_pub.publish(Twist())
+
+            # Step 4: test if the path ahead is now clear
+            time.sleep(0.3)
+            if self.front_distance > self.OBSTACLE_THRESHOLD:
+                self.get_logger().info('Path clear - resuming travel to goal')
+                return
+            else:
+                self.get_logger().info(
+                    f'Still blocked at {self.front_distance:.2f}m - repeating maneuver')
+
+        self.get_logger().warn('Max avoidance attempts reached, resuming anyway')
 
     def execute_callback(self, goal_handle):
         target_x = goal_handle.request.target_x
@@ -64,7 +133,7 @@ class NavigateToGoalServer(Node):
         self.get_logger().info(f'Navigating to ({target_x:.2f}, {target_y:.2f})')
 
         feedback_msg = NavigateToGoal.Feedback()
-        tolerance = 0.15
+        tolerance = 0.4
 
         while rclpy.ok():
             dx = target_x - self.current_x
@@ -81,22 +150,19 @@ class NavigateToGoalServer(Node):
                 result.message = 'Goal canceled'
                 return result
 
+            if self.front_distance < self.OBSTACLE_THRESHOLD:
+                self.avoid_obstacle(goal_handle, target_x, target_y)
+                continue
+
             twist = Twist()
+            angle_diff = self.angle_to_goal(target_x, target_y)
 
-            if self.front_distance < 0.6:
+            if abs(angle_diff) > 0.2:
                 twist.linear.x = 0.0
-                twist.angular.z = 0.5
+                twist.angular.z = 0.6 if angle_diff > 0 else -0.6
             else:
-                target_angle = math.atan2(dy, dx)
-                angle_diff = target_angle - self.current_yaw
-                angle_diff = math.atan2(math.sin(angle_diff), math.cos(angle_diff))
-
-                if abs(angle_diff) > 0.2:
-                    twist.linear.x = 0.0
-                    twist.angular.z = 0.6 if angle_diff > 0 else -0.6
-                else:
-                    twist.linear.x = min(0.3, distance)
-                    twist.angular.z = angle_diff * 1.5
+                twist.linear.x = min(0.3, distance)
+                twist.angular.z = angle_diff * 1.5
 
             self.cmd_vel_pub.publish(twist)
             feedback_msg.distance_remaining = distance
