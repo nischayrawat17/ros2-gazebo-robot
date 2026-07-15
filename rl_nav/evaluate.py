@@ -8,6 +8,8 @@ successes, collisions, timeouts = 0, 0, 0
 n_episodes = 20
 for ep in range(n_episodes):
     obs, _ = env.reset()
+    while not env.path_blocked():
+        obs, _ = env.reset()
     terminated = truncated = False
     while not (terminated or truncated):
         action, _ = model.predict(obs, deterministic=True)
